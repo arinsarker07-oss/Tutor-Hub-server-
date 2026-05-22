@@ -25,6 +25,9 @@ async function run() {
     const db = client.db("TutorHub")
     // create collection tutor details
     const TutorDetailsCollection = db.collection("TutorDetails")
+      // create collection booking
+    const bookingCollection = db.collection("bookings")
+    
     // post all details
     app.post("/TutorDetails", async (req, res) => {
       const TutorDetails = req.body
