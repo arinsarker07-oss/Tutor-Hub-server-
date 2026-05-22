@@ -1,3 +1,4 @@
+// done 
 const express = require("express")
 const dotenv = require("dotenv")
 const cors = require("cors")
@@ -41,12 +42,12 @@ const verifyToken = async (req, res, next) => {
 }
 
 const JWKS = createRemoteJWKSet(
-  new URL('http://localhost:3000/api/auth/jwks')
+  new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
 )
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("TutorHub")
     // create collection tutor details
@@ -189,7 +190,7 @@ async function run() {
       }
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
