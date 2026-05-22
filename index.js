@@ -25,9 +25,9 @@ async function run() {
     const db = client.db("TutorHub")
     // create collection tutor details
     const TutorDetailsCollection = db.collection("TutorDetails")
-      // create collection booking
+    // create collection booking
     const bookingCollection = db.collection("bookings")
-    
+
     // post all details
     app.post("/TutorDetails", async (req, res) => {
       const TutorDetails = req.body
@@ -50,14 +50,14 @@ async function run() {
       const result = await TutorDetailsCollection.findOne({ _id: new ObjectId(id) })
       res.json(result)
     })
-        // add tutor page
+    // add tutor page
     app.get("/my-tutors/:email", async (req, res) => {
       const email = req.params.email;
       const query = { user_email: email };
       const result = await TutorDetailsCollection.find(query).toArray();
       res.send(result);
     });
-    
+
     // UPDATE TUTOR
     app.patch('/update-tutor/:id', async (req, res) => {
       const id = req.params.id;
@@ -69,7 +69,7 @@ async function run() {
       );
       res.send(result);
     });
-    
+
     // delete 
     app.delete('/delete-tutor/:id', async (req, res) => {
       const id = req.params.id;
@@ -77,6 +77,14 @@ async function run() {
       const result = await TutorDetailsCollection.deleteOne(query);
       res.send(result);
     });
+
+    //  booking data create
+    app.post('/booking', async (req, res) => {
+      const bookingData = req.body
+      const result = await bookingCollection.insertOne(bookingData)
+      res.json(result)
+    })
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
