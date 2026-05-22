@@ -54,6 +54,18 @@ async function run() {
       const result = await TutorDetailsCollection.find(query).toArray();
       res.send(result);
     });
+    
+    // UPDATE TUTOR
+    app.patch('/update-tutor/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      // Your MongoDB update logic here
+      const result = await TutorDetailsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: updatedData }
+      );
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
