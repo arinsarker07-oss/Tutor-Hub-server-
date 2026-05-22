@@ -22,7 +22,31 @@ async function run() {
   try {
     await client.connect();
 
- 
+    const db = client.db("TutorHub")
+    // create collection tutor details
+    const TutorDetailsCollection = db.collection("TutorDetails")
+    // post all details
+    app.post("/TutorDetails", async (req, res) => {
+      const TutorDetails = req.body
+      const result = await TutorDetailsCollection.insertOne(TutorDetails)
+      res.json(result)
+    })
+    //  get all details in tutors page 
+    app.get("/TutorDetails", async (req, res) => {
+      const result = await TutorDetailsCollection.find().toArray()
+      res.json(result)
+    })
+    // get tutor details in home page 
+    app.get("/TutorDetail", async (req, res) => {
+      const result = await TutorDetailsCollection.find().limit(6).toArray()
+      res.json(result)
+    })
+    // get tutor details in details page 
+    app.get("/TutorDetails/:id", async (req, res) => {
+      const { id } = req.params
+      const result = await TutorDetailsCollection.findOne({ _id: new ObjectId(id) })
+      res.json(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
