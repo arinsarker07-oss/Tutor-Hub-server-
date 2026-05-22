@@ -2,6 +2,7 @@ const express = require("express")
 const dotenv = require("dotenv")
 const cors = require("cors")
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 dotenv.config()
 
 const app = express()
@@ -18,6 +19,30 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+// jwt token function 
+const verifyToken = async (req, res, next) => {
+  const authHeader = req?.headers.authorization
+  if (!authHeader) {
+    return res.status(401).json({ message: "unauthorized" })
+  }
+  const token = authHeader.split(" ")[1]
+  if (!token) {
+    return res.status(401).json({ message: "unauthorized" })
+  }
+  try {
+    const { payload } = await jwtVerify(token, JWKS)
+    console.log(payload);
+    next()
+  } catch (error) {
+    return res.status(401).json({ message: "Forbidden" })
+  }
+
+}
+
+const JWKS = createRemoteJWKSet(
+  new URL('http://localhost:3000/api/auth/jwks')
+)
 
 async function run() {
   try {
@@ -49,7 +74,7 @@ async function run() {
     })
 
     // get tutor details in details page 
-    app.get("/TutorDetails/:id", async (req, res) => {
+    app.get("/TutorDetails/:id", verifyToken, async (req, res) => {
       const { id } = req.params
       const result = await TutorDetailsCollection.findOne({ _id: new ObjectId(id) })
       res.json(result)
@@ -83,14 +108,14 @@ async function run() {
     });
 
     // booking data create and update tutor slots
-    app.post('/booking', async (req, res) => {
+    app.post('/booking', verifyToken, async (req, res) => {
       const bookingData = req.body;
       const tutorId = bookingData.tutor_id;
 
       try {
         // 1. First check if the tutor has available slots
         const tutor = await TutorDetailsCollection.findOne({ _id: new ObjectId(tutorId) });
-        
+
         // Convert total_slots to an integer in case it is stored as a string
         const currentSlots = parseInt(tutor.total_slots) || 0;
 
@@ -128,13 +153,13 @@ async function run() {
     });
 
     // delete booking and restore tutor slot
-    app.delete('/booking/:id', async (req, res) => {
+    app.delete('/booking/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
 
       try {
         // 1. Find the booking data first to retrieve the tutor_id before deletion
         const booking = await bookingCollection.findOne({ _id: new ObjectId(id) });
-        
+
         if (!booking) {
           return res.status(404).json({ success: false, message: "Booking not found" });
         }
