@@ -47,6 +47,13 @@ async function run() {
       const result = await TutorDetailsCollection.findOne({ _id: new ObjectId(id) })
       res.json(result)
     })
+        // add tutor page
+    app.get("/my-tutors/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { user_email: email };
+      const result = await TutorDetailsCollection.find(query).toArray();
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
